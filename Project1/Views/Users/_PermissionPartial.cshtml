@@ -1,0 +1,94 @@
+﻿@model IEnumerable<Project1.Models.UserPermission>
+
+@{ 
+    int i = 0;
+}
+
+<div>
+    @using (Html.BeginForm("ChangePermission", "Users"))
+    {
+        <ul>
+            @foreach (var item in ViewBag.ListPermission)
+            {
+                <li>
+                    <input class="form-control single-line" data-val="true" id="[@i].PermissionId" name="[@i].PermissionId" type="hidden" value="">
+                        @*<input class="form-control single-line" data-val="true" id="[@i].CodeName" name="[@i].CodeName" type="hidden" value="@item.CodeName">*@
+                    @if (ViewBag.LstPermission.Contains(item.CodeName))
+                    {
+                        if (ViewBag.Lrole.Contains(item.CodeName))
+                        {
+                            <input class="not-active " disabled data-val="true" id="[@i].Deny" name="[@i].Deny" type="checkbox" value="@item.Name" checked>
+
+                        }
+                        else
+                        {
+                            <input class="" data-val="true" id="[@i].Deny" name="[@i].Deny" type="checkbox" value="@item.Name" checked>
+                        }
+                    }
+                    else
+                    {
+                        <input class="" data-val="true" id="[@i].Deny" name="[@i].Deny" type="checkbox" value="@item.Name">
+                    }
+                    <input name="[@i].Deny" type="hidden" value="false">
+                    <label>@item.Name</label>
+
+
+                    @if (true)
+                    {
+                        <input class="" data-val="true" id="" name="" type="checkbox" value="">
+                    }
+                    else
+                    {
+                        <input class="" data-val="true" id="" name="" type="checkbox" value="">
+                    }
+                </li>
+                i++;
+            }
+        </ul>
+        <input type="submit" value="Change Permission" class="btn btn-danger" />
+    }
+</div>
+
+@*<div>
+    @using (Html.BeginForm("ChangePermission", "Users"))
+    {
+        <ul>
+            @foreach (var item in Model)
+            {
+                <li>
+                    @Html.HiddenFor(modelItem => item.UserId)
+                    @Html.HiddenFor(modelItem => item.PermissionId)
+                    <input class="form-control single-line" data-val="true" id="[@i].Id" name="[@i].Id" type="hidden" value="@item.Id">
+                    <input class="form-control single-line" data-val="true" id="[@i].CodeName" name="[@i].CodeName" type="hidden" value="@item.CodeName">
+                    @if (ViewBag.LstPermission.Contains(item.CodeName))
+                    {
+                        if (ViewBag.Lrole.Contains(item.CodeName))
+                        {
+                            <input class="not-active " disabled data-val="true" id="[@i].Name" name="[@i].Name" type="checkbox" value="@item.Name" checked>
+                        }
+                        else
+                        {
+                            <input class="" data-val="true" id="[@i].Name" name="[@i].Name" type="checkbox" value="@item.Name" checked>
+                        }
+                    }
+                    else
+                    {
+                        <input class="" data-val="true" id="[@i].Name" name="[@i].Name" type="checkbox" value="@item.Name">
+                    }
+                    <label>@item.Name</label>
+                    <div class="form-group">
+                        @Html.LabelFor(modelItem => item.Deny, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                @Html.EditorFor(modelItem => item.Deny)
+                                @Html.ValidationMessageFor(modelItem => item.Deny, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                i++;
+            }
+        </ul>
+        <input type="submit" value="Change Permission" class="btn btn-danger" />
+    }
+</div>*@
