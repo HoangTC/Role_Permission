@@ -47,7 +47,13 @@ namespace Project1.Controllers
                 vali = valid.ValidEmail(account.Email);
                 if (vali != "")
                     ModelState.AddModelError("Email", vali);
-                if (account.Password != "" && !account.Password.Equals(account.RPassword))
+                vali = valid.ValidatePassword(account.Password);
+                if (vali != "")
+                    ModelState.AddModelError("Password", vali);
+                vali = valid.ValidatePassword(account.RPassword);
+                if (vali != "")
+                    ModelState.AddModelError("RPassword", vali);
+                if (account.Password != null && !account.Password.Equals(account.RPassword))
                     ModelState.AddModelError("RPassword", "Xác nhận mật khẩu không đúng.");
                 if (ModelState.IsValid)
                 {
@@ -295,7 +301,16 @@ namespace Project1.Controllers
         {
             if(Session["AccountId"] == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            //thieu validate password
+            var vali = valid.ValidatePassword(oldPassword);
+            if (vali != "")
+                ModelState.AddModelError("oldPassword", vali);
+            vali = valid.ValidatePassword(password);
+            if (vali != "")
+                ModelState.AddModelError("password", vali);
+            vali = valid.ValidatePassword(rPassword);
+            if (vali != "")
+                ModelState.AddModelError("rPassword", vali);
+
             int userId = (int)Session["AccountId"];
             User user = db.Users.Find(userId);
             oldPassword = encode.EncodeMd(oldPassword);

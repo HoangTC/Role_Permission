@@ -13,7 +13,7 @@ namespace Project1.Models
         public int UserId { get; set; }
         [Key, Column(Order = 1)]
         public int PermissionId { get; set; }
-        public bool Deny { get; set; }
+        public bool? Deny { get; set; }
 
         [ForeignKey("UserId")]
         public virtual User User { get; set; }

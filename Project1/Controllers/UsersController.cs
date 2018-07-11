@@ -294,6 +294,7 @@ namespace Project1.Controllers
                 {
                     user.Email = Email;
                     ViewBag.Message = "Thay đổi thông tin thành công";
+                    db.SaveChanges();
                 }
             }
             else if (user.Username != Username && user.Email == Email)
@@ -305,6 +306,7 @@ namespace Project1.Controllers
                 {
                     user.Username = Username;
                     ViewBag.Message = "Thay đổi thông tin thành công";
+                    db.SaveChanges();
                 }
             }
             else
@@ -320,10 +322,9 @@ namespace Project1.Controllers
                     user.Username = Username;
                     user.Email = Email;
                     ViewBag.Message = "Thay đổi thông tin thành công";
+                    db.SaveChanges();
                 }
             }
-            db.SaveChanges();
-
             ViewBag.ListRole = db.Roles;
             var lstRole = user.Roles.Select(r => r.Name).ToArray();
             ViewBag.LstRole = string.Join(",", lstRole);
@@ -429,7 +430,7 @@ namespace Project1.Controllers
                             item.Deny = true;
                             db.UserPermissions.Add(item);
                         }
-                        else if(userper != null && !Array.Exists(db.Users.Find(userId).Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray(), r => r == db.Permissions.FirstOrDefault(p => p.Id == item.PermissionId).CodeName))
+                        else if (userper != null && !Array.Exists(db.Users.Find(userId).Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray(), r => r == db.Permissions.FirstOrDefault(p => p.Id == item.PermissionId).CodeName))
                         {
                             db.UserPermissions.Remove(userper);
                         }
@@ -454,7 +455,7 @@ namespace Project1.Controllers
                                 userper.Deny = false;
                             }
                         }
-                        else if(userper != null)
+                        else if (userper != null)
                         {
                             db.UserPermissions.Remove(userper);
                         }

@@ -118,3 +118,4 @@ C:\Users\HoangTC\Documents\Project1\Project1\obj\Debug\Project1.pdb
 C:\Users\HoangTC\Documents\Project1\Project1\obj\Debug\Project1.Migrations.Init.resources
 C:\Users\HoangTC\Documents\Project1\Project1\obj\Debug\Project1.csproj.GenerateResource.Cache
 C:\Users\HoangTC\Documents\Project1\Project1\obj\Debug\Project1.Migrations.Init1.resources
+C:\Users\HoangTC\Documents\Project1\Project1\obj\Debug\Project1.Migrations.EditUserPermissionModel.resources

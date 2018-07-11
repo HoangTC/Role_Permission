@@ -181,6 +181,10 @@
     <Compile Include="Migrations\201807100114455_Init1.Designer.cs">
       <DependentUpon>201807100114455_Init1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201807110820151_EditUserPermissionModel.cs" />
+    <Compile Include="Migrations\201807110820151_EditUserPermissionModel.Designer.cs">
+      <DependentUpon>201807110820151_EditUserPermissionModel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\Permission.cs" />
@@ -291,6 +295,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201807100114455_Init1.resx">
       <DependentUpon>201807100114455_Init1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201807110820151_EditUserPermissionModel.resx">
+      <DependentUpon>201807110820151_EditUserPermissionModel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
