@@ -275,6 +275,7 @@
     <Content Include="Views\Users\UserProfile.cshtml" />
     <Content Include="Views\Accounts\ChangePassword.cshtml" />
     <Content Include="Views\Users\_PermissionPartial.cshtml" />
+    <Content Include="Views\Home\About.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
