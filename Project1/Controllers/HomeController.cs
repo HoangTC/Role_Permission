@@ -24,6 +24,7 @@ namespace Project1.Controllers
                 //Response.StatusCode = (int)HttpStatusCode.BadRequest;
             else
                 Response.StatusCode = (int)HttpStatusCode.OK;
+            ViewBag.Message = "Hello world";
             ViewBag.UserId = new SelectList(db.Users, "Id", "Username");
             ViewBag.RoleId = new SelectList(db.Roles, "Id", "Name");
             return View();
