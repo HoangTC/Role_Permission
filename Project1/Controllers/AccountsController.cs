@@ -41,18 +41,18 @@ namespace Project1.Controllers
         {
             try
             {
-                var vali = valid.ValidUserName(account.Username);
-                if (vali != "")
-                    ModelState.AddModelError("UserName", vali);
-                vali = valid.ValidEmail(account.Email);
-                if (vali != "")
-                    ModelState.AddModelError("Email", vali);
-                vali = valid.ValidatePassword(account.Password);
-                if (vali != "")
-                    ModelState.AddModelError("Password", vali);
-                vali = valid.ValidatePassword(account.RPassword);
-                if (vali != "")
-                    ModelState.AddModelError("RPassword", vali);
+                //var vali = valid.ValidUserName(account.Username);
+                //if (vali != "")
+                //    ModelState.AddModelError("UserName", vali);
+                //vali = valid.ValidEmail(account.Email);
+                //if (vali != "")
+                //    ModelState.AddModelError("Email", vali);
+                //vali = valid.ValidatePassword(account.Password);
+                //if (vali != "")
+                //    ModelState.AddModelError("Password", vali);
+                //vali = valid.ValidatePassword(account.RPassword);
+                //if (vali != "")
+                //    ModelState.AddModelError("RPassword", vali);
                 if (account.Password != null && !account.Password.Equals(account.RPassword))
                     ModelState.AddModelError("RPassword", "Xác nhận mật khẩu không đúng.");
                 if (ModelState.IsValid)
@@ -87,11 +87,6 @@ namespace Project1.Controllers
         
         public ActionResult Login()
         {
-            //string[] arr = { "One", "Two", "Three" };
-            //var target = "Onee";
-            //var results = Array.FindAll(arr, s => s.Equals(target));
-            //bool a = Array.Exists(arr, element => element == "One");
-
             if (Session["AccountId"] != null)
                 return RedirectToAction("Index", "Home");
             return View();
@@ -103,20 +98,20 @@ namespace Project1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var us = db.Users.FirstOrDefault(u => u.Username == account.Username);
-                if (us != null)
+                var user = db.Users.FirstOrDefault(u => u.Username == account.Username);
+                if (user != null)
                 {
-                    if (DateTime.Compare(us.TimeCountLogin, DateTime.UtcNow.AddMinutes(-3)) <= 0)
+                    if (DateTime.Compare(user.TimeCountLogin, DateTime.UtcNow.AddMinutes(-3)) <= 0)
                     {
-                        us.CountLogin = 0;
-                        us.TimeCountLogin = DateTime.UtcNow;
+                        user.CountLogin = 0;
+                        user.TimeCountLogin = DateTime.UtcNow;
                         db.SaveChanges();
                     }
-                    if (us.CountLogin < 3)
+                    if (user.CountLogin < 3)
                     {
                         string pass = encode.EncodeMd(account.Password);
-                        var user = db.Users.Where(u => u.Username == account.Username && u.Password == pass).FirstOrDefault();
-                        if (user != null)
+                        //var user = db.Users.Where(u => u.Username == account.Username && u.Password == pass).FirstOrDefault();
+                        if (user.Password == pass)//user != null)
                         {
                             if(user.ConfirmActivity == true)
                             {
@@ -142,10 +137,10 @@ namespace Project1.Controllers
                         }
                         else
                         {
-                            us.CountLogin++;
-                            if (us.CountLogin == 3)
+                            user.CountLogin++;
+                            if (user.CountLogin == 3)
                             {
-                                us.TimeCountLogin = DateTime.UtcNow;
+                                user.TimeCountLogin = DateTime.UtcNow;
                             }
                             db.SaveChanges();
                             ViewBag.Message = "Mật khẩu không chính xác, vui lòng nhập lại.";

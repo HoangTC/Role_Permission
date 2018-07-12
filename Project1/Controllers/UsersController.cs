@@ -134,17 +134,10 @@ namespace Project1.Controllers
             try
             {
                 User user = db.Users.Find(userId);
-                //db.Users.Attach(user);
-
-                //Permission permission = db.Permissions.Find(permissionId);
-                //db.Permissions.Attach(permission);
-
-                //user.Permissions.Add(permission);
                 UserPermission usper = new UserPermission { UserId = userId, PermissionId = permissionId, Deny = false };
                 db.UserPermissions.Add(usper);
-                /////
                 db.SaveChanges();
-                ViewBag.LstPermission = user.UserPermissions.Select(p => p.Permisssion).Distinct();/////
+                ViewBag.LstPermission = user.UserPermissions.Select(p => p.Permisssion).Distinct();
                 ViewBag.Username = user.Username;
                 ViewBag.UserId = user.Id;
             }
@@ -205,12 +198,6 @@ namespace Project1.Controllers
         public ActionResult DeletePermissionInUser(int userId, int permissionId)//Xóa permission chủa user
         {
             User user = db.Users.Find(userId);
-            //db.Users.Attach(user);
-
-            //Permission permission = db.Permissions.Find(permissionId);
-            //db.Permissions.Attach(permission);
-
-            //user.Permissions.Remove(permission);
             UserPermission usper = db.UserPermissions.FirstOrDefault(up => up.UserId == userId && up.PermissionId == permissionId);
             db.UserPermissions.Remove(usper);
             db.SaveChanges();
@@ -419,30 +406,40 @@ namespace Project1.Controllers
             try
             {
                 int userId = int.Parse(TempData["UserId"].ToString());
+                var permissions = db.Permissions;
+                var listCode = db.Users.Where(u => u.Id == userId).SelectMany(u => u.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct()).ToArray();//.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray();
                 foreach (var item in UserPermissions)
                 {
-                    var userper = db.UserPermissions.FirstOrDefault(u => u.UserId == userId && u.PermissionId == item.PermissionId);
+                    //var permissions = db.Permissions.Where(p => p.Id == item.PermissionId).Select(p => p.CodeName).FirstOrDefault();
+                    var userper = db.UserPermissions.Where(u => u.UserId == userId && u.PermissionId == item.PermissionId);
                     if (item.Deny == false)
                     {
-                        if (userper == null && Array.Exists(db.Users.Find(userId).Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray(), r => r == db.Permissions.FirstOrDefault(p => p.Id == item.PermissionId).CodeName))
+                        if (userper == null && Array.Exists(listCode, r => r == permissions.Where(p => p.Id == item.PermissionId).Select(p => p.CodeName).FirstOrDefault()))
                         {
                             item.UserId = userId;
                             item.Deny = true;
                             db.UserPermissions.Add(item);
                         }
-                        else if (userper != null && !Array.Exists(db.Users.Find(userId).Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray(), r => r == db.Permissions.FirstOrDefault(p => p.Id == item.PermissionId).CodeName))
+                        else if (userper != null)
                         {
-                            db.UserPermissions.Remove(userper);
+                            if (Array.Exists(listCode, r => r == permissions.Where(p => p.Id == item.PermissionId).Select(p => p.CodeName).FirstOrDefault()))
+                            {
+                                userper.FirstOrDefault().Deny = true;
+                            }
+                            else
+                            {
+                                db.UserPermissions.Remove(userper.FirstOrDefault());
+                            }
+                            
                         }
-                        else if (userper != null && Array.Exists(db.Users.Find(userId).Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray(), r => r == db.Permissions.FirstOrDefault(p => p.Id == item.PermissionId).CodeName))
-                        {
-                            userper.Deny = true;
-                        }
-                        db.SaveChanges();
                     }
                     else
                     {
-                        if (!Array.Exists(db.Users.Find(userId).Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray(), r => r == db.Permissions.FirstOrDefault(p => p.Id == item.PermissionId).CodeName))
+                        if (userper != null)
+                        {
+                            db.UserPermissions.Remove(userper.FirstOrDefault());
+                        }
+                        else if (!Array.Exists(listCode, r => r == permissions.Where(p => p.Id == item.PermissionId).Select(p => p.CodeName).FirstOrDefault()))
                         {
                             if (userper == null)
                             {
@@ -452,36 +449,13 @@ namespace Project1.Controllers
                             }
                             else
                             {
-                                userper.Deny = false;
+                                userper.FirstOrDefault().Deny = false;
                             }
                         }
-                        else if (userper != null)
-                        {
-                            db.UserPermissions.Remove(userper);
-                        }
-                        db.SaveChanges();
+                        
                     }
                 }
-
-                //User user = db.Users.Find(userId);
-                //var listRole = user.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray();
-                //foreach (var item in UserPermissions)
-                //{
-                //    if (!Array.Exists(listRole, r => r == item.CodeName))
-                //    {
-                //        UserPermission usper = db.UserPermissions.FirstOrDefault(up => up.UserId == userId && up.PermissionId == item.Id);
-                //        if (item.Name != null && usper == null)// tim item.Name co trong database ko
-                //        {
-                //            usper = new UserPermission { UserId = userId, PermissionId = item.Id, Deny = false };
-                //            db.UserPermissions.Add(usper);
-                //        }
-                //        else if (item.Name == null && usper != null)
-                //        {
-                //            db.UserPermissions.Remove(usper);
-                //        }
-                //        db.SaveChanges();
-                //    }
-                //}
+                db.SaveChanges();
                 return RedirectToAction("Profiles", "Users", new { id = userId });
             }
             catch (Exception e)

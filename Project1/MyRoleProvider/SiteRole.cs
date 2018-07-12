@@ -54,28 +54,28 @@ namespace Project1.MyRoleProvider
         {
             int id = Int32.Parse(userId);
             ManagerContext db = new ManagerContext();
-            //var data = db.Users.FirstOrDefault(u => u.Id == id);
-            //var result = (db.Users.FirstOrDefault(u => u.Id == id).Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)))
-            //    .Union(db.Users.FirstOrDefault(u => u.Id == id).UserPermissions.Where(p => p.Deny != true).Select(p => p.Permisssion.CodeName));
 
+            //C1
             var result = (db.Users.Where(u => u.Id == id)
                                   .SelectMany(u => u.Roles.SelectMany(r => r.Permissions))
                                   .Select(p => p.CodeName))
                          .Union(db.Users.Where(u => u.Id == id)
                                         .SelectMany(u => u.UserPermissions.Select(up => up.Permisssion))
                                         .Select(p => p.CodeName))
-                          .Distinct()
-                          .Except(db.Users.Where(u => u.Id == id)
-                                          .SelectMany(u => u.UserPermissions.Where(up => up.Deny == true).Select(up => up.Permisssion))
-                                          .Select(p => p.CodeName)
-                                          ).ToArray();
+                         .Except(db.Users.Where(u => u.Id == id)
+                                         .SelectMany(u => u.UserPermissions.Where(up => up.Deny == true)
+                                                                           .Select(up => up.Permisssion))
+                                         .Select(p => p.CodeName))
+                         .Distinct().ToArray();
 
-               // .Select(ro => ro.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Union(ro.UserPermissions.Select(p => p.Permisssion.CodeName)));
-            //    .Union(db.Users.FirstOrDefault(u => u.Id == id).UserPermissions.Where(p => p.Deny != true).Select(p => p.Permisssion.CodeName));
-
-            //var lstDeny = data.UserPermissions.Where(up => up.Deny == true).Select(p => p.Permisssion.CodeName).Distinct();
-            //var result1 = result.Except(lstDeny).ToArray();
-            return result;
+            //C2
+            var result1 = db.Users.Where(u => u.Id == id)
+                                  .SelectMany(u => u.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName))
+                                                    .Union(u.UserPermissions.Select(p => p.Permisssion.CodeName))
+                                                    .Except(u.UserPermissions.Where(up => up.Deny == true).Select(up => up.Permisssion.CodeName))
+                                                    .Distinct()
+                                                    ).ToArray();
+            return result1;
         }
 
         public override string[] GetUsersInRole(string roleName)
