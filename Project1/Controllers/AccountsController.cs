@@ -121,7 +121,7 @@ namespace Project1.Controllers
                                 Session["AccountId"] = user.Id;
                                 FormsAuthentication.SetAuthCookie(user.Id.ToString(), true);
 
-                                if(Array.Exists(user.Roles.Select(r => r.Name).ToArray(), r => r == "SuperAdmin"))
+                                if (Array.Exists(user.Roles.Select(r => r.Name).ToArray(), r => r == "SuperAdmin"))
                                     Session["RoleId"] = 1;
                                 else if (Array.Exists(user.Roles.Select(r => r.Name).ToArray(), r => r == "Admins"))
                                     Session["RoleId"] = 2;
@@ -253,11 +253,11 @@ namespace Project1.Controllers
         public ActionResult ConfirmPass(int AccountId, string Password, string RPassword)
         {
             if (Password != "" && !Password.Equals(RPassword))
-                ModelState.AddModelError("RPassword", "Password Mismatch");
+                ModelState.AddModelError("RPassword", "Xác nhận mật khẩu không đúng");
 
             if (ModelState.IsValid)
             {
-                var user = db.Users.FirstOrDefault(u => u.Id == AccountId);
+                var user = db.Users.FirstOrDefault(u => u.Id == AccountId);//.Find(AccountId)
                 if (user != null)
                 {
                     user.ActivationCode = null;
@@ -273,7 +273,6 @@ namespace Project1.Controllers
                     ViewBag.Message = "Xác nhận thành công.";
                     return View();
                 }
-
             }
             ViewBag.Id = AccountId;
             var account = new User();
@@ -326,6 +325,7 @@ namespace Project1.Controllers
         public ActionResult Logoff()
         {
             Session["AccountId"] = null;
+            Session["RoleId"] = null;
             FormsAuthentication.SignOut();
             return RedirectToAction("Login", "Accounts");
         }

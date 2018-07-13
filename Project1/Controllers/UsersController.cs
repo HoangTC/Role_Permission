@@ -197,7 +197,6 @@ namespace Project1.Controllers
         [HttpGet]
         public ActionResult DeletePermissionInUser(int userId, int permissionId)//Xóa permission chủa user
         {
-            User user = db.Users.Find(userId);
             UserPermission usper = db.UserPermissions.FirstOrDefault(up => up.UserId == userId && up.PermissionId == permissionId);
             db.UserPermissions.Remove(usper);
             db.SaveChanges();
@@ -234,7 +233,7 @@ namespace Project1.Controllers
         [HttpGet]
         public ActionResult UserProfile()
         {
-            if (Session["RoleId"] == null)
+            if (Session["AccountId"] == null || Session["RoleId"] == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -260,7 +259,7 @@ namespace Project1.Controllers
         [HttpPost]
         public ActionResult UserProfile(string Username, string Email)
         {
-            if (Session["RoleId"] == null)
+            if (Session["AccountId"] == null || Session["RoleId"] == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -347,13 +346,25 @@ namespace Project1.Controllers
             ViewBag.LstRole = string.Join(",", lstRole);
 
             ViewBag.ListPermission = db.Permissions;
-            var lstPermission = user.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Concat(user.UserPermissions.Where(up => up.Deny == false).Select(p => p.Permisssion.CodeName)).Distinct();
-            var lstDeny = user.UserPermissions.Where(up => up.Deny == true).Select(p => p.Permisssion.CodeName).Distinct();
-            var remains = lstPermission.Except(lstDeny);
-
-            ViewBag.LstPermission = string.Join(",", remains.ToArray());
-            ViewBag.Lrole = string.Join(",", user.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct());
-            ViewBag.ListDeny = string.Join(",", user.UserPermissions.Where(d => d.Deny == true).Select(p => p.Permisssion.CodeName).Distinct());
+            //var lstPermission = user.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName))
+            //                        .Concat(user.UserPermissions.Where(up => up.Deny == false).Select(p => p.Permisssion.CodeName))
+            //                        .Distinct();
+            //var lstDeny = user.UserPermissions.Where(up => up.Deny == true).Select(p => p.Permisssion.CodeName).Distinct();
+            //var remains = lstPermission.Except(lstDeny);//.ToArray()
+            var listPer = (db.Users.Where(u => u.Id == id)
+                                  .SelectMany(u => u.Roles.SelectMany(r => r.Permissions))
+                                  .Select(p => p.CodeName))
+                         .Union(db.Users.Where(u => u.Id == id)
+                                        .SelectMany(u => u.UserPermissions.Select(up => up.Permisssion))
+                                        .Select(p => p.CodeName))
+                         .Except(db.Users.Where(u => u.Id == id)
+                                         .SelectMany(u => u.UserPermissions.Where(up => up.Deny == true)
+                                                                           .Select(up => up.Permisssion))
+                                         .Select(p => p.CodeName))
+                         .Distinct();
+            ViewBag.LstPermission = string.Join(",", listPer);
+            var lstDeny = user.UserPermissions.Where(d => d.Deny == true).Select(p => p.Permisssion.CodeName).Distinct();
+            ViewBag.ListDeny = string.Join(",", lstDeny);
             return View(user);
         }
 
@@ -379,13 +390,14 @@ namespace Project1.Controllers
             try
             {
                 int userId = int.Parse(TempData["UserId"].ToString());
+                var listRole = db.Roles.Select(r => r.Name).ToArray();
                 User user = db.Users.Find(userId);
                 db.Users.Attach(user);
                 foreach (var item in Roles)
                 {
                     Role role = db.Roles.Find(item.Id);
                     db.Roles.Attach(role);
-                    if (item.Name != null)// tim co trong database ko
+                    if (Array.Exists(listRole, r => r == item.Name))//item.Name != null)
                         user.Roles.Add(role);
                     else
                         user.Roles.Remove(role);
@@ -401,20 +413,24 @@ namespace Project1.Controllers
 
         [Authorize(Roles = CustomPermission.ManagerProfile)]
         [HttpPost]
-        public ActionResult ChangePermission(IEnumerable<UserPermission> UserPermissions)//IEnumerable<Permission> Permissions
+        public ActionResult ChangePermission(IEnumerable<UserPermission> UserPermissions)
         {
             try
             {
                 int userId = int.Parse(TempData["UserId"].ToString());
-                var permissions = db.Permissions;
-                var listCode = db.Users.Where(u => u.Id == userId).SelectMany(u => u.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct()).ToArray();//.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct().ToArray();
+                var listCode = db.Users.Where(u => u.Id == userId)
+                                       .SelectMany(u => u.Roles.SelectMany(r => r.Permissions.Select(p => p.CodeName)).Distinct())
+                                       .ToArray();
                 foreach (var item in UserPermissions)
                 {
-                    //var permissions = db.Permissions.Where(p => p.Id == item.PermissionId).Select(p => p.CodeName).FirstOrDefault();
-                    var userper = db.UserPermissions.Where(u => u.UserId == userId && u.PermissionId == item.PermissionId);
+                    var permissions = db.Permissions.Where(p => p.Id == item.PermissionId)
+                                                    .Select(p => p.CodeName)
+                                                    .FirstOrDefault();
+                    var userper = db.UserPermissions.Where(u => u.UserId == userId && u.PermissionId == item.PermissionId)
+                                                    .FirstOrDefault();
                     if (item.Deny == false)
                     {
-                        if (userper == null && Array.Exists(listCode, r => r == permissions.Where(p => p.Id == item.PermissionId).Select(p => p.CodeName).FirstOrDefault()))
+                        if (userper == null && Array.Exists(listCode, r => r == permissions))
                         {
                             item.UserId = userId;
                             item.Deny = true;
@@ -422,24 +438,23 @@ namespace Project1.Controllers
                         }
                         else if (userper != null)
                         {
-                            if (Array.Exists(listCode, r => r == permissions.Where(p => p.Id == item.PermissionId).Select(p => p.CodeName).FirstOrDefault()))
+                            if (Array.Exists(listCode, r => r == permissions))
                             {
-                                userper.FirstOrDefault().Deny = true;
+                                userper.Deny = true;
                             }
                             else
                             {
-                                db.UserPermissions.Remove(userper.FirstOrDefault());
+                                db.UserPermissions.Remove(userper);
                             }
-                            
                         }
                     }
                     else
                     {
                         if (userper != null)
                         {
-                            db.UserPermissions.Remove(userper.FirstOrDefault());
+                            db.UserPermissions.Remove(userper);
                         }
-                        else if (!Array.Exists(listCode, r => r == permissions.Where(p => p.Id == item.PermissionId).Select(p => p.CodeName).FirstOrDefault()))
+                        else if (!Array.Exists(listCode, r => r == permissions))
                         {
                             if (userper == null)
                             {
@@ -449,10 +464,9 @@ namespace Project1.Controllers
                             }
                             else
                             {
-                                userper.FirstOrDefault().Deny = false;
+                                userper.Deny = false;
                             }
                         }
-                        
                     }
                 }
                 db.SaveChanges();

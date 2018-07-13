@@ -55,18 +55,18 @@ namespace Project1.MyRoleProvider
             int id = Int32.Parse(userId);
             ManagerContext db = new ManagerContext();
 
-            //C1
-            var result = (db.Users.Where(u => u.Id == id)
-                                  .SelectMany(u => u.Roles.SelectMany(r => r.Permissions))
-                                  .Select(p => p.CodeName))
-                         .Union(db.Users.Where(u => u.Id == id)
-                                        .SelectMany(u => u.UserPermissions.Select(up => up.Permisssion))
-                                        .Select(p => p.CodeName))
-                         .Except(db.Users.Where(u => u.Id == id)
-                                         .SelectMany(u => u.UserPermissions.Where(up => up.Deny == true)
-                                                                           .Select(up => up.Permisssion))
-                                         .Select(p => p.CodeName))
-                         .Distinct().ToArray();
+            ////C1
+            //var result = (db.Users.Where(u => u.Id == id)
+            //                      .SelectMany(u => u.Roles.SelectMany(r => r.Permissions))
+            //                      .Select(p => p.CodeName))
+            //             .Union(db.Users.Where(u => u.Id == id)
+            //                            .SelectMany(u => u.UserPermissions.Select(up => up.Permisssion))
+            //                            .Select(p => p.CodeName))
+            //             .Except(db.Users.Where(u => u.Id == id)
+            //                             .SelectMany(u => u.UserPermissions.Where(up => up.Deny == true)
+            //                                                               .Select(up => up.Permisssion))
+            //                             .Select(p => p.CodeName))
+            //             .Distinct().ToArray();
 
             //C2
             var result1 = db.Users.Where(u => u.Id == id)

@@ -38,5 +38,6 @@ namespace Project1.Configuration
         public const string DeleteRoleUser = "DeleteRoleUser";
         public const string ManagerProfile = "ManagerProfile";
         public const string UserProfile = "UserProfile";
+        
     }
 }
